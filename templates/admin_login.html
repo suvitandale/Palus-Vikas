@@ -1,0 +1,46 @@
+<!-- templates/admin_login.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Admin Login - Palus Vikas</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <style>
+    .login-card { max-width:420px; margin:80px auto; padding:18px; background:#fff; border-radius:8px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+    .flash { padding:8px; margin-bottom:12px; border-radius:6px; }
+    .flash.error { background:#ffd6d6; color:#7a1a1a; }
+    .flash.info { background:#d6f0ff; color:#064a6b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="login-card">
+      <h2>Admin Login</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat, msg in messages %}
+            <div class="flash {{ cat }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        <div class="form-row">
+          <label>Username</label>
+          <input name="username" required>
+        </div>
+        <div class="form-row">
+          <label>Password</label>
+          <input name="password" type="password" required>
+        </div>
+        <div class="form-row">
+          <button class="btn" type="submit">Login</button>
+        </div>
+      </form>
+      <p style="font-size:13px;color:#666;margin-top:8px;">Use admin credentials to access the dashboard.</p>
+    </div>
+  </div>
+</body>
+</html>

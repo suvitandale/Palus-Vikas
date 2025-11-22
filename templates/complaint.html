@@ -1,0 +1,72 @@
+<!-- templates/complaint.html -->
+<!doctype html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8">
+  <title>Palus Vikas - तक्रार नोंदवा</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <header class="simple-header">
+          <h2>तक्रार नोंदवा — {{ main_category }}</h2>
+  
+  </header>
+
+  <main class="container">
+    <form id="complaintForm" onsubmit="return false;">
+      
+      <div class="form-row">
+        <label>समस्या निवडा</label>
+        <select id="subCategory" required></select>
+      </div>
+
+      <div class="form-row">
+        <label>प्रभाग क्रमांक</label>
+        <input type="text" id="prabhag" required>
+      </div>
+
+      <div class="form-row">
+        <label>नागरिकांचा पत्ता</label>
+        <textarea id="address" rows="2" required></textarea>
+      </div>
+
+      <div class="form-row">
+        <label>संपर्क क्रमांक</label>
+        <input type="tel" id="contact" required>
+      </div>
+
+      <div class="form-row">
+        <label>ई-मेल पत्ता</label>
+        <input type="email" id="email">
+      </div>
+
+      <div class="form-row">
+        <button id="submitBtn" class="btn">सबमिट करा</button>
+      </div>
+    </form>
+    
+  </main>
+    <div class="navbar">
+ <a href="/categories" class="nav-link">← मागे जा</a>
+  </div>
+
+  <!-- Modal for ticket -->
+  <div id="ticketModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <span id="closeModal" class="close-btn">&times;</span>
+      <h3>तुमची तक्रार नोंद झाली आहे</h3>
+      <p>टिकट आयडी: <strong id="ticketIdDisplay"></strong></p>
+      <p>कृपया हा आयडी सेव्ह करून ठेवा.</p>
+      <div style="margin-top:12px; text-align:center;">
+        <button id="ticketOkBtn" class="btn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAIN_CATEGORY = "{{ main_category }}";
+  </script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

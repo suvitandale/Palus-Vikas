@@ -1,0 +1,28 @@
+<!-- templates/categories.html -->
+<!doctype html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8">
+  <title>Palus Vikas - Categories</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body><div class="title-area" >
+  <header class="simple-header">
+    <h2>नागरिक तक्रार नोंदणी</h>
+   
+  </header></div>
+  <main class="container">
+    <div class="categories-grid">
+      {% for cat in categories %}
+      <a class="category-card" href="/complaint/{{ cat.key }}">{{ cat.label }}</a>
+      {% endfor %}
+    </div>
+
+  </main>
+  <div class="navbar">
+ <a href="/" class="nav-link">← Home</a>
+  </div>
+
+</body>
+</html>
