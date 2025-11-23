@@ -1,9 +1,9 @@
 // static/js/scheme.js
 
 document.addEventListener('DOMContentLoaded', () => {
-  // If on scheme form page, populate categories and wire submit
+  // If on scheme form page, populate problems and wire submit
   if (typeof SCHEME_NAME !== 'undefined' && SCHEME_NAME) {
-    loadSchemeCategories(SCHEME_NAME);
+    loadSchemeProblems(SCHEME_NAME);
     document.getElementById('submitBtn').addEventListener('click', submitForm);
     document.getElementById('closeModal').addEventListener('click', hideModal);
       // OK button in ticket modal (if present)
@@ -15,11 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function loadSchemeCategories(scheme) {
+function loadSchemeProblems(scheme) {
   fetch(`/scheme_options?scheme=${encodeURIComponent(scheme)}`)
     .then(r => r.json())
     .then(items => {
-      const sel = document.getElementById('schemeCategory');
+      const sel = document.getElementById('schemeProblem');
       sel.innerHTML = '';
       items.forEach(it => {
         const opt = document.createElement('option');
@@ -29,15 +29,14 @@ function loadSchemeCategories(scheme) {
       });
     })
     .catch(err => {
-      console.error("Failed to load scheme categories:", err);
+      console.error("Failed to load scheme problems:", err);
     });
 }
 
 function submitForm() {
   const payload = {
     scheme_name: SCHEME_NAME,
-    scheme_category: document.getElementById('schemeCategory').value,
-    scheme_subcategory: document.getElementById('schemeSubcategory').value,
+    scheme_problem: document.getElementById('schemeProblem').value,
     prabhag: document.getElementById('prabhag').value.trim(),
     address: document.getElementById('address').value.trim(),
     contact: document.getElementById('contact').value.trim(),
@@ -45,7 +44,7 @@ function submitForm() {
   };
 
   // Basic client-side validation
-  if (!payload.scheme_category || !payload.scheme_subcategory || !payload.prabhag || !payload.address || !payload.contact) {
+  if (!payload.scheme_problem || !payload.prabhag || !payload.address || !payload.contact) {
     alert("कृपया सर्व आवश्यक फील्ड भरा.");
     return;
   }
@@ -61,8 +60,8 @@ function submitForm() {
       showTicketModal(data.application_id);
       // optionally reset form
       document.getElementById('schemeForm').reset();
-      // re-load categories since reset clears select
-      loadSchemeCategories(SCHEME_NAME);
+      // re-load problems since reset clears select
+      loadSchemeProblems(SCHEME_NAME);
     } else {
       alert("सर्वर त्रुटी: " + data.message);
     }

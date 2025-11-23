@@ -3,13 +3,13 @@
 <html lang="mr">
 <head>
   <meta charset="utf-8">
-  <title>Palus Vikas - योजना अर्ज</title>
+  <title>Palus Vikas - योजना तक्रार नोंदवा</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
   <header class="simple-header">
-          <h2>योजना अर्ज — {{ scheme_name }}</h2>
+          <h2>योजना तक्रार नोंदवा — {{ scheme_name }}</h2>
   
   </header>
 
@@ -17,13 +17,8 @@
     <form id="schemeForm" onsubmit="return false;">
       
       <div class="form-row">
-        <label>योजनांचा प्रकार निवडा</label>
-        <select id="schemeCategory" required></select>
-      </div>
-
-      <div class="form-row">
-        <label>योजना तपशील निवडा</label>
-        <select id="schemeSubcategory" required></select>
+        <label>समस्या निवडा</label>
+        <select id="schemeProblem" required></select>
       </div>
 
       <div class="form-row">
@@ -72,7 +67,7 @@
   <div id="ticketModal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <span id="closeModal" class="close-btn">&times;</span>
-      <h3>तुमचा अर्ज नोंद झाला आहे</h3>
+      <h3>तुमची तक्रार नोंद झाली आहे</h3>
       <p>आवेदन आयडी: <strong id="ticketIdDisplay"></strong></p>
       <p>कृपया हा आयडी सेव्ह करून ठेवा.</p>
       <div style="margin-top:12px; text-align:center;">

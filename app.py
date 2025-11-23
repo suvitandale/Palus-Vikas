@@ -42,6 +42,67 @@ SCHEMES = {
     "NULM अंतर्गत बचत गट कर्ज योजना": ["अर्ज", "स्थिती तपासा", "डाउनलोड फॉर्म"]
 }
 
+SCHEME_PROBLEMS = {
+    "घरकुल आवास योजना": [
+        "लाभार्थी नाव अंतिम यादीत नाही",
+        "घरकुल मंजुरी मिळाली नाही",
+        "कागदपत्रे तपासणी प्रलंबित",
+        "हप्त्याचे पैसे मिळत नाहीत",
+        "घर बांधकामास परवानगी मिळत नाही",
+        "टप्प्याचे (प्रथम/द्वितीय/तृतीय) पैसे थांबले आहेत",
+        "सर्व्हे/तपासणी अधिकारी वेळेवर भेट देत नाहीत",
+        "चुकीची माहिती नोंदवली गेली",
+        "घरकुल मंजुरी असूनही प्रत्यक्ष काम सुरू नाही"
+    ],
+    "रमाई आवास योजना": [
+        "अर्ज मंजूर होत नाही",
+        "जमिनीचे मोजमाप/सर्व्हे प्रलंबित",
+        "घर बांधकामाचा निधी थांबलेला",
+        "कागदपत्रे अपूर्ण दाखवत आहेत",
+        "मंजूर पण बांधकाम काम सुरू नाही",
+        "BPL/SECC यादीमध्ये नाव दिसत नाही",
+        "अधिकाऱ्यांकडून योग्य मार्गदर्शन नाही"
+    ],
+    "पीएम स्वनिधी योजना": [
+        "कर्ज मंजुरी मिळत नाही",
+        "अर्जात चुकीची माहिती दाखवली गेली",
+        "सबसिडी रक्कम मिळत नाही",
+        "बँकेकडून अर्ज स्वीकारला जात नाही",
+        "व्हेंडर आयडी व्हेरीफाय होत नाही",
+        "EMI संपर्क न देता डेबिट झाली",
+        "पोर्टलवर अर्ज अडकलेला (pending for verification)",
+        "दस्तऐवज अपुर्ण / mismatch"
+    ],
+    "पीएम विश्वकर्मा योजना": [
+        "नोंदणी होत नाही / OTP येत नाही",
+        "कागदपत्रे व्हेरीफाय होत नाहीत",
+        "प्रशिक्षण (Training) साठी बोलावत नाहीत",
+        "टूलकिट मिळाले नाही",
+        "आर्थिक मदत (loan) मंजूर होत नाही",
+        "पोर्टलवर चुकीचा व्यवसाय टॅग झाला",
+        "अर्जावर \"rejected\" कारण न देता दाखवला आहे"
+    ],
+    "अभय योजना": [
+        "थकबाकी माफी दाखवत नाही",
+        "अर्ज सबमिट केल्यानंतर अपडेट नाही",
+        "चुकीची दंड आकारणी",
+        "सवलत/माफी लागू होत नाही",
+        "बिलवर चुकीची माहिती",
+        "पोर्टलवर पेमेंट होत नाही",
+        "कार्यालयात अर्ज स्वीकारत नाहीत"
+    ],
+    "NULM अंतर्गत बचत गट कर्ज योजना": [
+        "SHG कर्ज मंजूर होत नाही",
+        "महिला बचत गटाची यादी अपडेट होत नाही",
+        "बँक अर्ज स्वीकारत नाही",
+        "कागदपत्र mismatch दाखवत आहेत",
+        "गट सभासदांची माहिती चुकीची नोंद",
+        "व्याजदर / EMI चुकीचे वटवले",
+        "गटाला revolving fund मिळत नाही",
+        "बँक प्रगती अहवाल अपडेट करत नाही"
+    ]
+}
+
 DB_PATH = 'palus_vikas.db'
 
 def gen_ticket_id():
@@ -77,13 +138,12 @@ def insert_scheme_application(data):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''
-    INSERT INTO scheme_applications (application_id, scheme_name, scheme_category, scheme_subcategory, prabhag, address, contact, email, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO scheme_applications (application_id, scheme_name, scheme_problem, prabhag, address, contact, email, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         data['application_id'],
         data['scheme_name'],
-        data['scheme_category'],
-        data['scheme_subcategory'],
+        data['scheme_problem'],
         data.get('prabhag'),
         data.get('address'),
         data.get('contact'),
@@ -143,7 +203,7 @@ def choices():
 @app.route('/scheme_options')
 def scheme_options():
     scheme = request.args.get('scheme')
-    items = SCHEMES.get(scheme, [])
+    items = SCHEME_PROBLEMS.get(scheme, [])
     return jsonify(items)
 
 @app.route('/complaint/<category>')
@@ -174,7 +234,7 @@ def scheme_form(scheme_name):
 @app.route('/submit_scheme', methods=['POST'])
 def submit_scheme():
     data = request.json
-    required = ['scheme_name', 'scheme_category', 'scheme_subcategory', 'prabhag', 'address', 'contact']
+    required = ['scheme_name', 'scheme_problem', 'prabhag', 'address', 'contact']
     for r in required:
         if not data.get(r):
             return jsonify({"status":"error", "message": f"Missing {r}"}), 400
