@@ -1,0 +1,29 @@
+<!-- templates/schemes.html -->
+<!doctype html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8">
+  <title>Palus Vikas - Schemes</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+<div class="title-area">
+  <header class="simple-header">
+    <h2>शासन मान्य योजना</h2>
+  </header>
+</div>
+  <main class="container">
+    <div class="categories-grid">
+      {% for scheme in schemes %}
+      <a class="category-card" href="/scheme/{{ scheme.key }}">{{ scheme.label }}</a>
+      {% endfor %}
+    </div>
+
+  </main>
+  <div class="navbar">
+ <a href="/" class="nav-link">← Home</a>
+  </div>
+
+</body>
+</html>

@@ -21,7 +21,25 @@ def init_db():
         address TEXT,
         contact TEXT,
         email TEXT,
-        created_at TEXT
+        created_at TEXT,
+        resolved INTEGER DEFAULT 0
+    )
+    ''')
+
+    # scheme_applications table
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS scheme_applications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        application_id TEXT NOT NULL UNIQUE,
+        scheme_name TEXT,
+        scheme_category TEXT,
+        scheme_subcategory TEXT,
+        prabhag TEXT,
+        address TEXT,
+        contact TEXT,
+        email TEXT,
+        created_at TEXT,
+        resolved INTEGER DEFAULT 0
     )
     ''')
 

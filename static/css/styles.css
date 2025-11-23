@@ -28,12 +28,12 @@ body {
     background-size: cover;          /* Stretches the image fully */
     background-position: center;     /* Keeps main content centered */
     background-repeat: no-repeat;    /* Avoid repeating */
-    height: 280px;                   /* Adjust based on your design */
+    height: 200px;                   /* Adjust based on your design */
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 0 1px;
-  padding: 50px;
+  padding: 30px;
   border-radius: 10px;
   flex: 0.7;
 }

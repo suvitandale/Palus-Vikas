@@ -27,6 +27,9 @@
     .ticket-id { font-weight:700; color:#333; font-size:14px; }
     .danger { background:#e85e5e; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
     .danger:hover { background:#d94242; }
+    .success { background:#28a745; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
+    .success:hover { background:#218838; }
+    .resolved-badge { background:#d4edda; color:#155724; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px; }
     .btn-small { padding:6px 10px; border-radius:6px; border:none; cursor:pointer; }
     .export-btn { display:inline-block; margin-top:15px; padding:10px 20px; background:#28a745; color:#fff; text-decoration:none; border-radius:4px; }
     .export-btn:hover { background:#218838; }
@@ -80,6 +83,7 @@
               <th>Contact</th>
               <th>Address</th>
               <th>Created At</th>
+              <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -95,14 +99,25 @@
                 <td style="max-width:240px;">{{ c['address'] }}</td>
                 <td class="small">{% set date_part = c['created_at'][:10].split('-') %}{{ date_part[2] }}-{{ date_part[1] }}-{{ date_part[0] }} {{ c['created_at'][11:19] }}</td>
                 <td>
-                  <form method="post" action="/admin/delete/{{ c['id'] }}" onsubmit="return confirm('Are you sure you want to delete this complaint?');">
-                    <button type="submit" class="danger">Delete</button>
-                  </form>
+                  {% if c['resolved'] %}
+                    <span class="resolved-badge">✓ Resolved</span>
+                  {% else %}
+                    <span style="color:#999;">Pending</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if not c['resolved'] %}
+                    <form method="post" action="/admin/resolve/{{ c['id'] }}" style="display:inline;">
+                      <button type="submit" class="success">✓ Resolve</button>
+                    </form>
+                  {% else %}
+                    <span style="color:#28a745; font-weight:600;">✓ Resolved</span>
+                  {% endif %}
                 </td>
               </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="8" style="text-align:center;">No complaints found.</td></tr>
+              <tr><td colspan="9" style="text-align:center;">No complaints found.</td></tr>
             {% endif %}
           </tbody>
         </table>

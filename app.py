@@ -33,6 +33,15 @@ CHOICES = {
     ]
 }
 
+SCHEMES = {
+    "घरकुल आवास योजना": ["अर्ज", "स्थिती तपासा", "डाउनलोड फॉर्म"],
+    "रमाई आवास योजना": ["अर्ज", "स्थिती तपासा", "डाउनलोड फॉर्म"],
+    "पीएम स्वनिधी योजना": ["अर्ज", "स्थिती तपासा", "डाउनलोड फॉर्म"],
+    "पीएम विश्वकर्मा योजना": ["अर्ज", "स्थिती तपासा", "डाउनलोड फॉर्म"],
+    "अभय योजना": ["अर्ज", "स्थिती तपासा", "डाउनलोड फॉर्म"],
+    "NULM अंतर्गत बचत गट कर्ज योजना": ["अर्ज", "स्थिती तपासा", "डाउनलोड फॉर्म"]
+}
+
 DB_PATH = 'palus_vikas.db'
 
 def gen_ticket_id():
@@ -50,6 +59,31 @@ def insert_complaint(data):
         data['ticket_id'],
         data['main_category'],
         data['sub_category'],
+        data.get('prabhag'),
+        data.get('address'),
+        data.get('contact'),
+        data.get('email'),
+        datetime.utcnow().isoformat()
+    ))
+    conn.commit()
+    conn.close()
+
+def gen_application_id():
+    date_str = datetime.utcnow().strftime("%Y%m%d")
+    rnd = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+    return f"APP-{date_str}-{rnd}"
+
+def insert_scheme_application(data):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+    INSERT INTO scheme_applications (application_id, scheme_name, scheme_category, scheme_subcategory, prabhag, address, contact, email, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        data['application_id'],
+        data['scheme_name'],
+        data['scheme_category'],
+        data['scheme_subcategory'],
         data.get('prabhag'),
         data.get('address'),
         data.get('contact'),
@@ -88,10 +122,28 @@ def categories():
     ]
     return render_template('categories.html', categories=categories_list)
 
+@app.route('/schemes')
+def schemes():
+    schemes_list = [
+        {"key":"घरकुल आवास योजना", "label":"🏠 घरकुल आवास योजना"},
+        {"key":"रमाई आवास योजना", "label":"🏠 रमाई आवास योजना"},
+        {"key":"पीएम स्वनिधी योजना", "label":"💼 पीएम स्वनिधी योजना"},
+        {"key":"पीएम विश्वकर्मा योजना", "label":"👷 पीएम विश्वकर्मा योजना"},
+        {"key":"अभय योजना", "label":"🛡️ अभय योजना"},
+        {"key":"NULM अंतर्गत बचत गट कर्ज योजना", "label":"💰 NULM अंतर्गत बचत गट कर्ज योजना"},
+    ]
+    return render_template('schemes.html', schemes=schemes_list)
+
 @app.route('/choices')
 def choices():
     cat = request.args.get('category')
     items = CHOICES.get(cat, [])
+    return jsonify(items)
+
+@app.route('/scheme_options')
+def scheme_options():
+    scheme = request.args.get('scheme')
+    items = SCHEMES.get(scheme, [])
     return jsonify(items)
 
 @app.route('/complaint/<category>')
@@ -114,6 +166,27 @@ def submit_complaint():
         return jsonify({"status":"error", "message": str(e)}), 500
 
     return jsonify({"status":"ok", "ticket_id": ticket_id})
+
+@app.route('/scheme/<scheme_name>')
+def scheme_form(scheme_name):
+    return render_template('scheme_form.html', scheme_name=scheme_name)
+
+@app.route('/submit_scheme', methods=['POST'])
+def submit_scheme():
+    data = request.json
+    required = ['scheme_name', 'scheme_category', 'scheme_subcategory', 'prabhag', 'address', 'contact']
+    for r in required:
+        if not data.get(r):
+            return jsonify({"status":"error", "message": f"Missing {r}"}), 400
+
+    application_id = gen_application_id()
+    data['application_id'] = application_id
+    try:
+        insert_scheme_application(data)
+    except Exception as e:
+        return jsonify({"status":"error", "message": str(e)}), 500
+
+    return jsonify({"status":"ok", "application_id": application_id})
 
 # ---------- Admin routes ----------
 @app.route('/admin/login', methods=['GET', 'POST'])
@@ -181,15 +254,15 @@ def admin_dashboard():
     return render_template('admin_dashboard.html', complaints=rows, categories=cat_list,
                            filter_category=category, filter_prabhag=prabhag, filter_search=search)
 
-@app.route('/admin/delete/<int:complaint_id>', methods=['POST'])
+@app.route('/admin/resolve/<int:complaint_id>', methods=['POST'])
 @admin_required
-def admin_delete(complaint_id):
+def admin_resolve(complaint_id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("DELETE FROM complaints WHERE id = ?", (complaint_id,))
+    cur.execute("UPDATE complaints SET resolved = 1 WHERE id = ?", (complaint_id,))
     conn.commit()
     conn.close()
-    flash("Complaint deleted.", "info")
+    flash("Complaint marked as resolved.", "info")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/export', methods=['GET'])
@@ -221,20 +294,23 @@ def admin_export():
     rows = cur.fetchall()
     conn.close()
 
-    # Create CSV in-memory
+    # Create CSV in-memory with UTF-8 BOM for proper encoding
     output = io.StringIO()
+    # Write BOM for Excel to recognize UTF-8 properly
+    output.write('\ufeff')
     writer = csv.writer(output)
-    header = ['id','ticket_id','main_category','sub_category','prabhag','address','contact','email','created_at']
+    header = ['id','ticket_id','main_category','sub_category','prabhag','address','contact','email','created_at','resolved']
     writer.writerow(header)
     for r in rows:
+        resolved_status = 'Yes' if r['resolved'] else 'No'
         writer.writerow([r['id'], r['ticket_id'], r['main_category'], r['sub_category'],
-                         r['prabhag'], r['address'], r['contact'], r['email'], r['created_at']])
+                         r['prabhag'], r['address'], r['contact'], r['email'], r['created_at'], resolved_status])
     output.seek(0)
 
     # send as attachment
     filename = f"complaints_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.csv"
     return send_file(
-        io.BytesIO(output.getvalue().encode('utf-8')),
+        io.BytesIO(output.getvalue().encode('utf-8-sig')),
         mimetype='text/csv',
         as_attachment=True,
         download_name=filename
